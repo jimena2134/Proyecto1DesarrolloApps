@@ -15,14 +15,12 @@ Por medio de la aplicación, los usuarios podrán crear una lista personal de re
 
 ## Organización del trabajo
 
-El proyecto QHambron será desarrollado de manera colaborativa por ambas integrantes, dividiendo las responsabilidades de la primera entrega de la siguiente manera:
+
 
 - **Jimena Acosta:** Encargada del diseño de los mockups de las pantallas de la aplicación, considerando buenas prácticas de UX y manteniendo una interfaz sencilla y consistente.
 - **Diana Gómez Alvarado:** Encargada de la documentación del proyecto, incluyendo la descripción, objetivos, funcionalidades y organización del README.
 
-Ambas integrantes participarán en la configuración del repositorio de GitHub y realizarán sus entregables mediante ramas independientes y Pull Requests hacia la rama `main`.
 
-Los cambios deberán ser revisados y aprobados antes de integrarse a la rama principal.
 
 ## Objetivo del proyecto
 
@@ -59,11 +57,7 @@ Estos filtros ayudarán a encontrar los establecimientos de una manera más ráp
 
 ### 3. Acceso a cámara o galería
 
-La aplicación permitirá agregar fotografías a los lugares registrados.
-
-El usuario podrá tomar una fotografía utilizando la cámara de su celular o seleccionar una imagen que ya tenga guardada en la galería.
-
-Las fotografías podrán ser del establecimiento o de algún plato de comida, permitiendo identificar mejor cada lugar.
+La aplicación permitirá agregar hasta cinco fotografías por lugar, ya sea tomando imágenes con la cámara o seleccionándolas desde la galería. Estas fotografías podrán visualizarse en la pantalla de detalle mediante un carrusel de imágenes.
 
 ### 4. Ventanas Dialog
 
@@ -90,7 +84,7 @@ Esto permite que el mapa sea sencillo de implementar y cumpla con el requisito d
 
 ## Funcionamiento de la aplicación
 
-Al ingresar a QHambron, el usuario encontrará una pantalla de inicio desde la cual podrá acceder a su lista de lugares registrados.
+Al ingresar a QHambron, el usuario encontrará una pantalla de inicio desde la cual podrá agregar un nuevo lugar o acceder a la lista de establecimientos registrados.
 
 Desde la lista podrá agregar nuevos establecimientos, aplicar filtros y seleccionar un lugar para consultar su información completa.
 
@@ -114,12 +108,12 @@ El proyecto se enfocará principalmente en registrar, organizar, consultar y adm
 
 Para el desarrollo de QHambron se proponen las siguientes pantallas:
 
-1. **Inicio:** Será la pantalla principal de la aplicación y permitirá acceder a las diferentes opciones disponibles.
+1. **Inicio:** Será la pantalla principal de la aplicación. Permitirá acceder rápidamente al formulario para agregar un nuevo lugar y navegar hacia la lista de establecimientos registrados.
 2. **Lista de lugares:** Mostrará los restaurantes y establecimientos registrados por el usuario. Contará con opciones de búsqueda y filtros personalizados.
 3. **Detalle del lugar:** Permitirá consultar la información completa de un establecimiento, incluyendo fotografía, tipo de comida, provincia, precio, calificación, estado, descripción y ubicación.
 4. **Agregar lugar:** Contendrá un formulario donde el usuario podrá registrar nuevos establecimientos, agregar fotografías y seleccionar su ubicación.
 5. **Editar lugar:** Permitirá modificar la información de un establecimiento registrado anteriormente.
-6. **Mapa:** Permitirá seleccionar la ubicación de un establecimiento al registrarlo y visualizarla posteriormente mediante un marcador.
+6. **Mapa:** Permitirá visualizar la ubicación guardada de un establecimiento mediante un marcador. También se utilizará al agregar o editar un lugar para seleccionar o modificar su ubicación.
 
 Además, se utilizará una ventana **Dialog de confirmación** cuando el usuario desee eliminar un establecimiento, para evitar que se borre información accidentalmente.
 

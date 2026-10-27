@@ -19,7 +19,7 @@
     <string name="rating">Calificación</string>
     <string name="photos">Fotografías</string>
     <string name="location">Ubicación</string>
-    <string name="save">Guardar</string>
+    <string name="save_place">Guardar lugar</string>
     <string name="edit">Editar</string>
     <string name="delete">Eliminar</string>
     <string name="cancel">Cancelar</string>
@@ -51,4 +51,28 @@
     <string name="guanacaste">Guanacaste</string>
     <string name="puntarenas">Puntarenas</string>
     <string name="limon">Limón</string>
+    <string name="home_question">¿Qué se te antoja hoy?</string>
+    <string name="home_description">Guarda tus lugares favoritos y los que quieres probar.</string>
+    <string name="home_add_message">¿Encontraste un lugar nuevo? ¡Agrégalo antes de que se te olvide!</string>
+    <string name="places">Lugares</string>
+    <string name="food_filter">Comida</string>
+    <string name="select_food_type">Seleccionar tipo de comida</string>
+    <string name="select_province">Seleccionar provincia</string>
+    <string name="select_status">Seleccionar estado</string>
+    <string name="all">Todos</string>
+    <string name="clear_filter">Limpiar filtro</string>
+    <string name="edit_place">Editar lugar</string>
+    <string name="save_changes">Guardar cambios</string>
+    <string name="fast_food">Comida rápida</string>
+    <string name="chicken">Pollo</string>
+    <string name="sushi">Sushi</string>
+    <string name="cafe">Cafetería</string>
+    <string name="pizza">Pizza</string>
+    <string name="burgers">Hamburguesas</string>
+    <string name="mexican">Mexicana</string>
+    <string name="italian">Italiana</string>
+    <string name="seafood">Mariscos</string>
+    <string name="desserts">Postres</string>
+    <string name="other">Otra</string>
+
 </resources>

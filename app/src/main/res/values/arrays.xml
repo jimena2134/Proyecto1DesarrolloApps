@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Resource file containing string arrays for food types, provinces, and status options. -->
+<resources>
+
+    <string-array name="food_type_options">
+        <item>@string/food_type</item>
+        <item>@string/fast_food</item>
+        <item>@string/chicken</item>
+        <item>@string/sushi</item>
+        <item>@string/cafe</item>
+        <item>@string/pizza</item>
+        <item>@string/burgers</item>
+        <item>@string/mexican</item>
+        <item>@string/italian</item>
+        <item>@string/seafood</item>
+        <item>@string/desserts</item>
+        <item>@string/other</item>
+    </string-array>
+
+    <string-array name="province_options">
+        <item>@string/province</item>
+        <item>@string/san_jose</item>
+        <item>@string/alajuela</item>
+        <item>@string/cartago</item>
+        <item>@string/heredia</item>
+        <item>@string/guanacaste</item>
+        <item>@string/puntarenas</item>
+        <item>@string/limon</item>
+    </string-array>
+
+    <string-array name="status_options">
+        <item>@string/visited</item>
+        <item>@string/want_to_visit</item>
+    </string-array>
+
+    <string-array name="food_filter_options">
+        <item>@string/all</item>
+        <item>@string/fast_food</item>
+        <item>@string/chicken</item>
+        <item>@string/sushi</item>
+        <item>@string/cafe</item>
+        <item>@string/pizza</item>
+        <item>@string/burgers</item>
+        <item>@string/mexican</item>
+        <item>@string/italian</item>
+        <item>@string/seafood</item>
+        <item>@string/desserts</item>
+        <item>@string/other</item>
+    </string-array>
+
+    <string-array name="province_filter_options">
+        <item>@string/all</item>
+        <item>@string/san_jose</item>
+        <item>@string/alajuela</item>
+        <item>@string/cartago</item>
+        <item>@string/heredia</item>
+        <item>@string/guanacaste</item>
+        <item>@string/puntarenas</item>
+        <item>@string/limon</item>
+    </string-array>
+
+    <string-array name="status_filter_options">
+        <item>@string/all</item>
+        <item>@string/visited</item>
+        <item>@string/want_to_visit</item>
+    </string-array>
+
+</resources>

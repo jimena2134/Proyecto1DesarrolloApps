@@ -20,7 +20,7 @@
     <string name="rating">Rating</string>
     <string name="photos">Photos</string>
     <string name="location">Location</string>
-    <string name="save">Save</string>
+    <string name="save_place">Save place</string>
     <string name="edit">Edit</string>
     <string name="delete">Delete</string>
     <string name="cancel">Cancel</string>
@@ -52,4 +52,27 @@
     <string name="guanacaste">Guanacaste</string>
     <string name="puntarenas">Puntarenas</string>
     <string name="limon">Limón</string>
+    <string name="home_question">What do you want to eat today?</string>
+    <string name="home_description">Save your favorite places and the places you want to try.</string>
+    <string name="home_add_message">Did you find a new place? Add it before you forget!</string>
+    <string name="places">Places</string>
+    <string name="food_filter">Food</string>
+    <string name="select_food_type">Select food type</string>
+    <string name="select_province">Select province</string>
+    <string name="select_status">Select status</string>
+    <string name="all">All</string>
+    <string name="clear_filter">Clear filter</string>
+    <string name="edit_place">Edit place</string>
+    <string name="save_changes">Save changes</string>
+    <string name="fast_food">Fast food</string>
+    <string name="chicken">Chicken</string>
+    <string name="sushi">Sushi</string>
+    <string name="cafe">Cafe</string>
+    <string name="pizza">Pizza</string>
+    <string name="burgers">Burgers</string>
+    <string name="mexican">Mexican</string>
+    <string name="italian">Italian</string>
+    <string name="seafood">Seafood</string>
+    <string name="desserts">Desserts</string>
+    <string name="other">Other</string>
 </resources>

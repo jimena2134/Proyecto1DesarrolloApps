@@ -1,3 +1,4 @@
+
 package proyecto.utn.qhambron
 
 import android.os.Bundle
@@ -9,17 +10,28 @@ import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.google.android.material.button.MaterialButton
+import proyecto.utn.qhambron.data.memory.RestaurantMemoryManager
+import proyecto.utn.qhambron.domain.model.PriceRange
+import proyecto.utn.qhambron.domain.model.Province
+import proyecto.utn.qhambron.domain.model.Restaurant
+import proyecto.utn.qhambron.domain.model.RestaurantStatus
+import proyecto.utn.qhambron.viewmodel.RestaurantViewModel
+import java.util.UUID
 
 /**
- * Activity for creating, editing, and managing restaurant place details and form inputs.
+ * Activity for creating and editing restaurants.
  */
 class PlaceActivity : AppCompatActivity() {
 
     private var isEditMode = false
+    private var restaurantId = ""
+
+    private lateinit var restaurantViewModel: RestaurantViewModel
 
     private lateinit var tvFormTitle: TextView
 
@@ -42,6 +54,7 @@ class PlaceActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         enableEdgeToEdge()
         setContentView(R.layout.activity_place)
 
@@ -49,10 +62,9 @@ class PlaceActivity : AppCompatActivity() {
             findViewById(R.id.main)
         ) { view, insets ->
 
-            val systemBars =
-                insets.getInsets(
-                    WindowInsetsCompat.Type.systemBars()
-                )
+            val systemBars = insets.getInsets(
+                WindowInsetsCompat.Type.systemBars()
+            )
 
             view.setPadding(
                 systemBars.left,
@@ -64,6 +76,10 @@ class PlaceActivity : AppCompatActivity() {
             insets
         }
 
+        restaurantViewModel = RestaurantViewModel(
+            RestaurantMemoryManager()
+        )
+
         initComponents()
         setupSpinners()
         checkMode()
@@ -72,47 +88,24 @@ class PlaceActivity : AppCompatActivity() {
 
     private fun initComponents() {
 
-        tvFormTitle =
-            findViewById(R.id.tvFormTitle)
+        tvFormTitle = findViewById(R.id.tvFormTitle)
 
-        etRestaurantName =
-            findViewById(R.id.etRestaurantName)
+        etRestaurantName = findViewById(R.id.etRestaurantName)
+        etDescription = findViewById(R.id.etDescription)
+        etMinimumPrice = findViewById(R.id.etMinimumPrice)
+        etMaximumPrice = findViewById(R.id.etMaximumPrice)
 
-        etDescription =
-            findViewById(R.id.etDescription)
+        spFoodType = findViewById(R.id.spFoodType)
+        spProvince = findViewById(R.id.spProvince)
+        spStatus = findViewById(R.id.spStatus)
 
-        etMinimumPrice =
-            findViewById(R.id.etMinimumPrice)
+        ratingBar = findViewById(R.id.ratingBar)
 
-        etMaximumPrice =
-            findViewById(R.id.etMaximumPrice)
-
-        spFoodType =
-            findViewById(R.id.spFoodType)
-
-        spProvince =
-            findViewById(R.id.spProvince)
-
-        spStatus =
-            findViewById(R.id.spStatus)
-
-        ratingBar =
-            findViewById(R.id.ratingBar)
-
-        btnBack =
-            findViewById(R.id.btnBack)
-
-        btnSelectLocation =
-            findViewById(R.id.btnSelectLocation)
-
-        btnSave =
-            findViewById(R.id.btnSave)
-
-        btnCamera =
-            findViewById(R.id.btnCamera)
-
-        btnGallery =
-            findViewById(R.id.btnGallery)
+        btnBack = findViewById(R.id.btnBack)
+        btnSelectLocation = findViewById(R.id.btnSelectLocation)
+        btnSave = findViewById(R.id.btnSave)
+        btnCamera = findViewById(R.id.btnCamera)
+        btnGallery = findViewById(R.id.btnGallery)
     }
 
     private fun setupSpinners() {
@@ -138,12 +131,11 @@ class PlaceActivity : AppCompatActivity() {
         arrayResource: Int
     ) {
 
-        val adapter =
-            ArrayAdapter.createFromResource(
-                this,
-                arrayResource,
-                android.R.layout.simple_spinner_item
-            )
+        val adapter = ArrayAdapter.createFromResource(
+            this,
+            arrayResource,
+            android.R.layout.simple_spinner_item
+        )
 
         adapter.setDropDownViewResource(
             android.R.layout.simple_spinner_dropdown_item
@@ -154,11 +146,14 @@ class PlaceActivity : AppCompatActivity() {
 
     private fun checkMode() {
 
-        isEditMode =
-            intent.getBooleanExtra(
-                "EDIT_MODE",
-                false
-            )
+        isEditMode = intent.getBooleanExtra(
+            "EDIT_MODE",
+            false
+        )
+
+        restaurantId = intent.getStringExtra(
+            "RESTAURANT_ID"
+        ) ?: ""
 
         if (isEditMode) {
             setupEditMode()
@@ -169,159 +164,90 @@ class PlaceActivity : AppCompatActivity() {
 
     private fun setupAddMode() {
 
-        tvFormTitle.text =
-            getString(R.string.add_place)
+        tvFormTitle.text = getString(R.string.add_place)
 
         btnSelectLocation.text =
             getString(R.string.select_location)
 
-        btnSave.text =
-            getString(R.string.save_place)
+        btnSave.text = getString(R.string.save_place)
     }
 
     private fun setupEditMode() {
 
-        tvFormTitle.text =
-            getString(R.string.edit_place)
+        tvFormTitle.text = getString(R.string.edit_place)
 
         btnSelectLocation.text =
             getString(R.string.change_location)
 
-        btnSave.text =
-            getString(R.string.save_changes)
+        btnSave.text = getString(R.string.save_changes)
 
         loadRestaurantData()
     }
 
     private fun loadRestaurantData() {
 
-        etRestaurantName.setText(
-            intent.getStringExtra(
-                "RESTAURANT_NAME"
-            ) ?: ""
-        )
+        val restaurant = restaurantViewModel
+            .getRestaurantById(restaurantId)
 
-        etDescription.setText(
-            intent.getStringExtra(
-                "DESCRIPTION"
-            ) ?: ""
-        )
+        if (restaurant == null) {
 
-        ratingBar.rating =
-            intent.getFloatExtra(
-                "RATING",
-                0f
-            )
+            Toast.makeText(
+                this,
+                getString(R.string.restaurant_not_found),
+                Toast.LENGTH_SHORT
+            ).show()
 
-        if (
-            intent.hasExtra(
-                "MINIMUM_PRICE"
-            )
-        ) {
-            etMinimumPrice.setText(
-                intent.getDoubleExtra(
-                    "MINIMUM_PRICE",
-                    0.0
-                ).toString()
-            )
+            finish()
+            return
         }
 
-        if (
-            intent.hasExtra(
-                "MAXIMUM_PRICE"
+        etRestaurantName.setText(restaurant.name)
+        etDescription.setText(restaurant.description)
+
+        ratingBar.rating = restaurant.rating
+
+        restaurant.priceRange?.let {
+
+            etMinimumPrice.setText(
+                it.minimumPrice.toString()
             )
-        ) {
+
             etMaximumPrice.setText(
-                intent.getDoubleExtra(
-                    "MAXIMUM_PRICE",
-                    0.0
-                ).toString()
+                it.maximumPrice.toString()
             )
         }
 
         selectSpinnerItem(
             spFoodType,
-            intent.getStringExtra(
-                "FOOD_TYPE"
-            )
+            restaurant.foodType
         )
 
-        selectProvince(
-            intent.getStringExtra(
-                "PROVINCE"
-            )
+        spProvince.setSelection(
+            restaurant.province.ordinal + 1
         )
 
-        selectStatus(
-            intent.getStringExtra(
-                "STATUS"
-            )
+        spStatus.setSelection(
+            restaurant.status.ordinal
         )
     }
 
     private fun selectSpinnerItem(
         spinner: Spinner,
-        value: String?
+        value: String
     ) {
 
-        if (value == null) {
-            return
-        }
-
-        for (
-        index in 0 until spinner.count
-        ) {
+        for (index in 0 until spinner.count) {
 
             if (
                 spinner.getItemAtPosition(index)
                     .toString()
-                    .equals(
-                        value,
-                        ignoreCase = true
-                    )
+                    .equals(value, ignoreCase = true)
             ) {
 
                 spinner.setSelection(index)
                 return
             }
         }
-    }
-
-    private fun selectProvince(
-        province: String?
-    ) {
-
-        val position =
-            when (province) {
-
-                "SAN_JOSE" -> 1
-                "ALAJUELA" -> 2
-                "CARTAGO" -> 3
-                "HEREDIA" -> 4
-                "GUANACASTE" -> 5
-                "PUNTARENAS" -> 6
-                "LIMON" -> 7
-
-                else -> 0
-            }
-
-        spProvince.setSelection(position)
-    }
-
-    private fun selectStatus(
-        status: String?
-    ) {
-
-        val position =
-            when (status) {
-
-                "VISITED" -> 0
-                "WANT_TO_VISIT" -> 1
-
-                else -> 0
-            }
-
-        spStatus.setSelection(position)
     }
 
     private fun setupListeners() {
@@ -347,9 +273,7 @@ class PlaceActivity : AppCompatActivity() {
 
             Toast.makeText(
                 this,
-                getString(
-                    R.string.select_from_gallery
-                ),
+                getString(R.string.select_from_gallery),
                 Toast.LENGTH_SHORT
             ).show()
         }
@@ -370,121 +294,186 @@ class PlaceActivity : AppCompatActivity() {
             return
         }
 
-        val name =
-            etRestaurantName.text
-                .toString()
-                .trim()
-
-        val foodType =
-            spFoodType.selectedItem
-                .toString()
-
-        val province =
-            spProvince.selectedItem
-                .toString()
-
-        val status =
-            spStatus.selectedItem
-                .toString()
-
-        val description =
-            etDescription.text
-                .toString()
-                .trim()
-
-        val minimumPrice =
-            etMinimumPrice.text
-                .toString()
-                .toDoubleOrNull()
-
-        val maximumPrice =
-            etMaximumPrice.text
-                .toString()
-                .toDoubleOrNull()
-
-        val rating =
-            ratingBar.rating
-
         if (isEditMode) {
-
-            Toast.makeText(
-                this,
-                getString(
-                    R.string.update_success
-                ),
-                Toast.LENGTH_SHORT
-            ).show()
-
+            showUpdateDialog()
         } else {
+            createRestaurant()
+        }
+    }
+
+    private fun createRestaurant() {
+
+        val restaurant = buildRestaurant(
+            UUID.randomUUID().toString()
+        )
+
+        restaurantViewModel.saveRestaurant(restaurant)
+
+        Toast.makeText(
+            this,
+            getString(R.string.save_success),
+            Toast.LENGTH_SHORT
+        ).show()
+
+        finish()
+    }
+
+    private fun showUpdateDialog() {
+
+        AlertDialog.Builder(this)
+            .setTitle(R.string.confirm_update_title)
+            .setMessage(R.string.confirm_update_message)
+            .setPositiveButton(R.string.yes) { _, _ ->
+                updateRestaurant()
+            }
+            .setNegativeButton(R.string.cancel, null)
+            .show()
+    }
+
+    private fun updateRestaurant() {
+
+        val existingRestaurant = restaurantViewModel
+            .getRestaurantById(restaurantId)
+
+        if (existingRestaurant == null) {
 
             Toast.makeText(
                 this,
-                getString(
-                    R.string.save_success
-                ),
+                getString(R.string.restaurant_not_found),
                 Toast.LENGTH_SHORT
             ).show()
+
+            return
         }
+
+        val formRestaurant = buildRestaurant(restaurantId)
+
+        val updatedRestaurant = formRestaurant.copy(
+            photoUris = existingRestaurant.photoUris,
+            location = existingRestaurant.location
+        )
+
+        restaurantViewModel.updateRestaurant(
+            updatedRestaurant
+        )
+
+        Toast.makeText(
+            this,
+            getString(R.string.update_success),
+            Toast.LENGTH_SHORT
+        ).show()
+
+        finish()
+    }
+
+    private fun buildRestaurant(id: String): Restaurant {
+
+        val name = etRestaurantName.text
+            .toString()
+            .trim()
+
+        val foodType = spFoodType.selectedItem
+            .toString()
+
+        val province = Province.values()[
+            spProvince.selectedItemPosition - 1
+        ]
+
+        val status = RestaurantStatus.values()[
+            spStatus.selectedItemPosition
+        ]
+
+        val description = etDescription.text
+            .toString()
+            .trim()
+
+        val minimumPrice = etMinimumPrice.text
+            .toString()
+            .toDoubleOrNull()
+
+        val maximumPrice = etMaximumPrice.text
+            .toString()
+            .toDoubleOrNull()
+
+        val priceRange =
+            if (minimumPrice != null && maximumPrice != null) {
+                PriceRange(minimumPrice, maximumPrice)
+            } else {
+                null
+            }
+
+        return Restaurant(
+            id = id,
+            name = name,
+            foodType = foodType,
+            province = province,
+            description = description,
+            priceRange = priceRange,
+            rating = ratingBar.rating,
+            status = status,
+            photoUris = emptyList(),
+            location = null
+        )
     }
 
     private fun isValidData(): Boolean {
 
         if (
-            etRestaurantName.text
-                .toString()
-                .trim()
-                .isEmpty()
+            etRestaurantName.text.toString()
+                .trim().isEmpty()
         ) {
 
             etRestaurantName.error =
-                getString(
-                    R.string.error_required_name
-                )
+                getString(R.string.error_required_name)
 
             etRestaurantName.requestFocus()
 
             return false
         }
 
-        if (
-            spFoodType.selectedItemPosition == 0
-        ) {
+        if (spFoodType.selectedItemPosition == 0) {
 
             Toast.makeText(
                 this,
-                getString(
-                    R.string.error_required_food_type
-                ),
+                getString(R.string.error_required_food_type),
                 Toast.LENGTH_SHORT
             ).show()
 
             return false
         }
 
-        if (
-            spProvince.selectedItemPosition == 0
-        ) {
+        if (spProvince.selectedItemPosition == 0) {
 
             Toast.makeText(
                 this,
-                getString(
-                    R.string.error_required_province
-                ),
+                getString(R.string.error_required_province),
                 Toast.LENGTH_SHORT
             ).show()
 
             return false
         }
 
-        val minimumPrice =
-            etMinimumPrice.text
-                .toString()
-                .toDoubleOrNull()
+        val minimumPrice = etMinimumPrice.text
+            .toString()
+            .toDoubleOrNull()
 
-        val maximumPrice =
-            etMaximumPrice.text
-                .toString()
-                .toDoubleOrNull()
+        val maximumPrice = etMaximumPrice.text
+            .toString()
+            .toDoubleOrNull()
+
+        if (
+            (minimumPrice == null) !=
+            (maximumPrice == null)
+        ) {
+
+            Toast.makeText(
+                this,
+                getString(R.string.error_incomplete_price),
+                Toast.LENGTH_SHORT
+            ).show()
+
+            return false
+        }
 
         if (
             minimumPrice != null &&
@@ -494,9 +483,7 @@ class PlaceActivity : AppCompatActivity() {
 
             Toast.makeText(
                 this,
-                getString(
-                    R.string.error_invalid_price
-                ),
+                getString(R.string.error_invalid_price),
                 Toast.LENGTH_SHORT
             ).show()
 

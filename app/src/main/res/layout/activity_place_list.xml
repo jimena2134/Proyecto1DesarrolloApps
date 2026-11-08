@@ -44,7 +44,7 @@
             android:background="@android:drawable/edit_text"
             android:drawableStart="@android:drawable/ic_menu_search"
             android:drawablePadding="10dp"
-            android:hint="@string/home_question"
+            android:hint="@string/search_restaurants"
             android:paddingStart="14dp"
             android:paddingEnd="14dp"
             android:singleLine="true"

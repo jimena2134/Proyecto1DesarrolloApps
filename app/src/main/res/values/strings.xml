@@ -88,6 +88,11 @@
     <string name="select_location_hint">Selecciona en el mapa la ubicación del lugar</string>
     <string name="confirm_location">Confirmar ubicación</string>
     <string name="location_confirmed">Ubicación seleccionada correctamente</string>
+    <string name="confirm_update_title">Confirmar actualización</string>
+    <string name="confirm_update_message">¿Desea guardar los cambios realizados en este restaurante?</string>
+    <string name="restaurant_not_found">No se encontró el restaurante</string>
+    <string name="error_incomplete_price">Debe completar ambos precios o dejarlos vacíos</string>
+    <string name="search_restaurants">Buscar restaurantes por nombre</string>
 
 
 </resources>

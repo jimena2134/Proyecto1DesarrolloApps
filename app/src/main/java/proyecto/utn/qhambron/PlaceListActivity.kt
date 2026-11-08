@@ -1,7 +1,11 @@
+
 package proyecto.utn.qhambron
 
 import android.content.Intent
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
+import android.widget.EditText
 import android.widget.LinearLayout
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AlertDialog
@@ -13,12 +17,19 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import proyecto.utn.qhambron.adapter.RestaurantAdapter
+import proyecto.utn.qhambron.data.memory.RestaurantMemoryManager
+import proyecto.utn.qhambron.domain.model.Province
 import proyecto.utn.qhambron.domain.model.Restaurant
+import proyecto.utn.qhambron.domain.model.RestaurantFilter
+import proyecto.utn.qhambron.domain.model.RestaurantStatus
+import proyecto.utn.qhambron.viewmodel.RestaurantViewModel
 
 /**
- * Activity that displays and manages the list of saved restaurants and places.
+ * Activity that displays, searches and filters restaurants.
  */
 class PlaceListActivity : AppCompatActivity() {
+
+    private lateinit var restaurantViewModel: RestaurantViewModel
 
     private lateinit var btnHome: LinearLayout
 
@@ -26,16 +37,21 @@ class PlaceListActivity : AppCompatActivity() {
     private lateinit var btnProvinceFilter: MaterialButton
     private lateinit var btnStatusFilter: MaterialButton
 
+    private lateinit var etSearchPlaces: EditText
     private lateinit var fabAddPlace: FloatingActionButton
 
     private lateinit var rvPlaces: RecyclerView
     private lateinit var restaurantAdapter: RestaurantAdapter
 
-    private val restaurantList =
-        mutableListOf<Restaurant>()
+    private val restaurantList = mutableListOf<Restaurant>()
+
+    private var selectedFoodType: String? = null
+    private var selectedProvince: Province? = null
+    private var selectedStatus: RestaurantStatus? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         enableEdgeToEdge()
         setContentView(R.layout.activity_place_list)
 
@@ -43,10 +59,9 @@ class PlaceListActivity : AppCompatActivity() {
             findViewById(R.id.main)
         ) { view, insets ->
 
-            val systemBars =
-                insets.getInsets(
-                    WindowInsetsCompat.Type.systemBars()
-                )
+            val systemBars = insets.getInsets(
+                WindowInsetsCompat.Type.systemBars()
+            )
 
             view.setPadding(
                 systemBars.left,
@@ -58,28 +73,38 @@ class PlaceListActivity : AppCompatActivity() {
             insets
         }
 
+        restaurantViewModel = RestaurantViewModel(
+            RestaurantMemoryManager()
+        )
+
         initComponents()
         setupRecyclerView()
         setupListeners()
+        loadRestaurants()
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        if (::restaurantViewModel.isInitialized &&
+            ::restaurantAdapter.isInitialized) {
+            loadRestaurants()
+        }
     }
 
     private fun initComponents() {
+
         btnHome = findViewById(R.id.btnHome)
 
-        btnFoodFilter =
-            findViewById(R.id.btnFoodFilter)
+        btnFoodFilter = findViewById(R.id.btnFoodFilter)
+        btnProvinceFilter = findViewById(R.id.btnProvinceFilter)
+        btnStatusFilter = findViewById(R.id.btnStatusFilter)
 
-        btnProvinceFilter =
-            findViewById(R.id.btnProvinceFilter)
+        etSearchPlaces = findViewById(R.id.etSearchPlaces)
 
-        btnStatusFilter =
-            findViewById(R.id.btnStatusFilter)
+        fabAddPlace = findViewById(R.id.fabAddPlace)
 
-        fabAddPlace =
-            findViewById(R.id.fabAddPlace)
-
-        rvPlaces =
-            findViewById(R.id.rvPlaces)
+        rvPlaces = findViewById(R.id.rvPlaces)
     }
 
     private fun setupRecyclerView() {
@@ -91,11 +116,9 @@ class PlaceListActivity : AppCompatActivity() {
             openEditRestaurant(restaurant)
         }
 
-        rvPlaces.layoutManager =
-            LinearLayoutManager(this)
+        rvPlaces.layoutManager = LinearLayoutManager(this)
 
-        rvPlaces.adapter =
-            restaurantAdapter
+        rvPlaces.adapter = restaurantAdapter
     }
 
     private fun setupListeners() {
@@ -105,8 +128,11 @@ class PlaceListActivity : AppCompatActivity() {
         }
 
         fabAddPlace.setOnClickListener {
-            val intent =
-                Intent(this, PlaceActivity::class.java)
+
+            val intent = Intent(
+                this,
+                PlaceActivity::class.java
+            )
 
             startActivity(intent)
         }
@@ -122,14 +148,74 @@ class PlaceListActivity : AppCompatActivity() {
         btnStatusFilter.setOnClickListener {
             showStatusFilter()
         }
+
+        etSearchPlaces.addTextChangedListener(
+            object : TextWatcher {
+
+                override fun beforeTextChanged(
+                    s: CharSequence?,
+                    start: Int,
+                    count: Int,
+                    after: Int
+                ) {
+                }
+
+                override fun onTextChanged(
+                    s: CharSequence?,
+                    start: Int,
+                    before: Int,
+                    count: Int
+                ) {
+                    loadRestaurants()
+                }
+
+                override fun afterTextChanged(
+                    s: Editable?
+                ) {
+                }
+            }
+        )
+    }
+
+    private fun loadRestaurants() {
+
+        val filter = RestaurantFilter(
+            status = selectedStatus,
+            province = selectedProvince,
+            foodType = selectedFoodType
+        )
+
+        val searchText = etSearchPlaces.text
+            .toString()
+            .trim()
+
+        val filteredRestaurants = restaurantViewModel
+            .filterRestaurants(filter)
+            .filter { restaurant ->
+
+                restaurant.name.contains(
+                    searchText,
+                    ignoreCase = true
+                )
+            }
+            .sortedBy { restaurant ->
+                restaurant.name.lowercase()
+            }
+
+        restaurantList.clear()
+        restaurantList.addAll(filteredRestaurants)
+
+        restaurantAdapter.notifyDataSetChanged()
     }
 
     private fun openEditRestaurant(
         restaurant: Restaurant
     ) {
 
-        val intent =
-            Intent(this, PlaceActivity::class.java)
+        val intent = Intent(
+            this,
+            PlaceActivity::class.java
+        )
 
         intent.putExtra("EDIT_MODE", true)
 
@@ -138,120 +224,96 @@ class PlaceListActivity : AppCompatActivity() {
             restaurant.id
         )
 
-        intent.putExtra(
-            "RESTAURANT_NAME",
-            restaurant.name
-        )
-
-        intent.putExtra(
-            "FOOD_TYPE",
-            restaurant.foodType
-        )
-
-        intent.putExtra(
-            "PROVINCE",
-            restaurant.province.name
-        )
-
-        intent.putExtra(
-            "STATUS",
-            restaurant.status.name
-        )
-
-        intent.putExtra(
-            "DESCRIPTION",
-            restaurant.description
-        )
-
-        intent.putExtra(
-            "RATING",
-            restaurant.rating
-        )
-
-        restaurant.priceRange?.let {
-            intent.putExtra(
-                "MINIMUM_PRICE",
-                it.minimumPrice
-            )
-
-            intent.putExtra(
-                "MAXIMUM_PRICE",
-                it.maximumPrice
-            )
-        }
-
         startActivity(intent)
     }
 
     private fun showFoodFilter() {
 
-        val options =
-            resources.getStringArray(
-                R.array.food_filter_options
-            )
-
-        showFilterDialog(
-            getString(
-                R.string.select_food_type
-            ),
-            options,
-            btnFoodFilter
+        val options = resources.getStringArray(
+            R.array.food_filter_options
         )
+
+        AlertDialog.Builder(this)
+            .setTitle(R.string.select_food_type)
+            .setItems(options) { _, position ->
+
+                selectedFoodType =
+                    if (position == 0) {
+                        null
+                    } else {
+                        options[position]
+                    }
+
+                btnFoodFilter.text =
+                    if (position == 0) {
+                        getString(R.string.food_filter)
+                    } else {
+                        options[position]
+                    }
+
+                loadRestaurants()
+            }
+            .setNegativeButton(R.string.cancel, null)
+            .show()
     }
 
     private fun showProvinceFilter() {
 
-        val options =
-            resources.getStringArray(
-                R.array.province_filter_options
-            )
-
-        showFilterDialog(
-            getString(
-                R.string.select_province
-            ),
-            options,
-            btnProvinceFilter
+        val options = resources.getStringArray(
+            R.array.province_filter_options
         )
+
+        AlertDialog.Builder(this)
+            .setTitle(R.string.select_province)
+            .setItems(options) { _, position ->
+
+                selectedProvince =
+                    if (position == 0) {
+                        null
+                    } else {
+                        Province.values()[position - 1]
+                    }
+
+                btnProvinceFilter.text =
+                    if (position == 0) {
+                        getString(R.string.province)
+                    } else {
+                        options[position]
+                    }
+
+                loadRestaurants()
+            }
+            .setNegativeButton(R.string.cancel, null)
+            .show()
     }
 
     private fun showStatusFilter() {
 
-        val options =
-            resources.getStringArray(
-                R.array.status_filter_options
-            )
-
-        showFilterDialog(
-            getString(
-                R.string.select_status
-            ),
-            options,
-            btnStatusFilter
+        val options = resources.getStringArray(
+            R.array.status_filter_options
         )
-    }
-
-    private fun showFilterDialog(
-        title: String,
-        options: Array<String>,
-        button: MaterialButton
-    ) {
 
         AlertDialog.Builder(this)
-            .setTitle(title)
-            .setItems(options) { dialog, position ->
+            .setTitle(R.string.select_status)
+            .setItems(options) { _, position ->
 
-                button.text =
-                    options[position]
+                selectedStatus =
+                    if (position == 0) {
+                        null
+                    } else {
+                        RestaurantStatus.values()[position - 1]
+                    }
 
-                dialog.dismiss()
+                btnStatusFilter.text =
+                    if (position == 0) {
+                        getString(R.string.status)
+                    } else {
+                        options[position]
+                    }
+
+                loadRestaurants()
             }
-            .setNegativeButton(
-                getString(R.string.cancel)
-            ) { dialog, _ ->
-
-                dialog.dismiss()
-            }
+            .setNegativeButton(R.string.cancel, null)
             .show()
     }
 }

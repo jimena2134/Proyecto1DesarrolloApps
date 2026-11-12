@@ -61,7 +61,7 @@ class PlaceDetailActivity : AppCompatActivity() {
         val btnEditPlace = findViewById<MaterialButton>(R.id.btnEditPlace)
         val btnDeletePlace = findViewById<MaterialButton>(R.id.btnDeletePlace)
 
-        loadPlaceData()
+        restaurantId = intent.getStringExtra("RESTAURANT_ID") ?: ""
 
         btnBack.setOnClickListener(View.OnClickListener{ view ->
             finish()
@@ -80,26 +80,39 @@ class PlaceDetailActivity : AppCompatActivity() {
         })
     }
 
+    override fun onResume() {
+        super.onResume()
+        loadPlaceData()
+    }
+
     private fun loadPlaceData(){
         try {
-            restaurantId = intent.getStringExtra("RESTAURANT_ID") ?: ""
-            tvPlaceName.text = intent.getStringExtra("RESTAURANT_NAME") ?: ""
-            tvPlaceRating.text = getString(R.string.rating_format,
-                intent.getFloatExtra("RATING", 0f))
-            tvPlaceDescription.text = intent.getStringExtra("DESCRIPTION") ?: ""
+            val restaurant = restaurantViewModel.getRestaurantById(restaurantId)
 
-            btnFoodTypeTag.text = intent.getStringExtra("FOOD_TYPE") ?: ""
-            btnProvinceTag.text = getProvinceText(intent.getStringExtra("PROVINCE"))
-            btnStatusTag.text = getStatusText(intent.getStringExtra("STATUS"))
+            if (restaurant == null){
+                Toast.makeText(this, getString(R.string.restaurant_not_found),
+                    Toast.LENGTH_SHORT).show()
+                finish()
+                return
+            }
+
+            tvPlaceName.text = restaurant.name
+            tvPlaceRating.text = getString(R.string.rating_format, restaurant.rating)
+            tvPlaceDescription.text = restaurant.description
+
+            btnFoodTypeTag.text = restaurant.foodType
+            btnProvinceTag.text = getProvinceText(restaurant.province.name)
+            btnStatusTag.text = getStatusText(restaurant.status.name)
 
             btnFoodTypeTag.isVisible = btnFoodTypeTag.text.isNotEmpty()
             btnProvinceTag.isVisible = btnProvinceTag.text.isNotEmpty()
             btnStatusTag.isVisible = btnStatusTag.text.isNotEmpty()
 
-            if (intent.hasExtra("MINIMUM_PRICE") && intent.hasExtra("MAXIMUM_PRICE")){
+            val priceRange = restaurant.priceRange
+            if (priceRange != null){
                 tvPriceRange.text = getString(R.string.price_range_format,
-                    intent.getDoubleExtra("MINIMUM_PRICE", 0.0),
-                    intent.getDoubleExtra("MAXIMUM_PRICE", 0.0))
+                    priceRange.minimumPrice, priceRange.maximumPrice)
+                tvPriceRange.isVisible = true
             }else{
                 tvPriceRange.isVisible = false
             }
@@ -132,7 +145,7 @@ class PlaceDetailActivity : AppCompatActivity() {
 
     private fun openEditPlace(){
         val editIntent = Intent(this, PlaceActivity::class.java)
-        editIntent.putExtras(intent)
+        editIntent.putExtra("RESTAURANT_ID", restaurantId)
         editIntent.putExtra("EDIT_MODE", true)
         startActivity(editIntent)
     }
@@ -141,7 +154,8 @@ class PlaceDetailActivity : AppCompatActivity() {
         val locationIntent = Intent(this, LocationActivity::class.java)
         locationIntent.putExtra("SELECTION_MODE", false)
         locationIntent.putExtra("RESTAURANT_NAME", tvPlaceName.text.toString())
-        locationIntent.putExtra("LOCATION_NAME", intent.getStringExtra("LOCATION_NAME"))
+        locationIntent.putExtra("LOCATION_NAME",
+            restaurantViewModel.getRestaurantById(restaurantId)?.location?.name)
         startActivity(locationIntent)
     }
 

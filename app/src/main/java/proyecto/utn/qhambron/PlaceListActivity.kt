@@ -214,10 +214,8 @@ class PlaceListActivity : AppCompatActivity() {
 
         val intent = Intent(
             this,
-            PlaceActivity::class.java
+            PlaceDetailActivity::class.java
         )
-
-        intent.putExtra("EDIT_MODE", true)
 
         intent.putExtra(
             "RESTAURANT_ID",
